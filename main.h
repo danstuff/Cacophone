@@ -26,6 +26,6 @@ const double PI = 3.14159265359;
 
 const float SONG_DURATION = 10;
 
-float random(float max);
+int random(int max);
 
 #endif

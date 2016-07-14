@@ -13,7 +13,6 @@ private:
 	float start_time;
 	float duration;
 
-	SoundBuffer buffer;
 	Sound sound;
 
 	RectangleShape rect;
@@ -21,7 +20,7 @@ private:
 public:
 	Note();
 
-	bool play(float time);
+	bool play(float time, SoundBuffer &buffer);
 	void draw(RenderWindow *window);
 };
 
