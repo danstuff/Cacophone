@@ -22,9 +22,12 @@ using namespace sf;
 
 typedef unsigned int uint;
 
-const double PI = 3.14159265359;
+const uint WIDTH = 640;
+const uint HEIGHT = 480;
 
-const float SONG_DURATION = 10;
+const float PI = 3.14159265359;
+
+const float SHAPE_RADIUS = 40;
 
 int random(int max);
 
