@@ -4,18 +4,23 @@
 #define PENDULUM_H
 
 #include "main.h"
+#include "shape.h"
 
 class Pendulum{
 private:
 	SoundBuffer buffer;
 	Sound sound;
 
+	ShapeType type;
+
 	Color color;
+	float radius;
+
+	float x, y;
+	float rot;
 
 	float ox, length;
 	float time;
-
-	RectangleShape sprite;
 
 public:
 	bool enabled;
@@ -24,12 +29,12 @@ public:
 
 	void enable();
 
-	float getX(), getY();
-	float getRadius();
+	void play();
 
+	bool collidedWith(int px, int py);
+	
 	void physics(RenderWindow &window);
 
-	void play();
 	void draw(RenderWindow &window);
 };
 

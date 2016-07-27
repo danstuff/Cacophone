@@ -25,9 +25,7 @@ typedef unsigned int uint;
 const uint WIDTH = 640;
 const uint HEIGHT = 480;
 
-const float PI = 3.14159265359;
-
-const float SHAPE_RADIUS = 40;
+const float PI = 3.14159265359f;
 
 int random(int max);
 

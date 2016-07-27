@@ -2,70 +2,48 @@
 
 Pendulum::Pendulum(){
 	//set up the sound buffer
-	const uint SAMPLE_RATE = 44100; //samples per second
-	const uint SAMPLES = SAMPLE_RATE/4; //total samples
-	const uint AMPLITUDE = 1000;
-
-	Int16 raw[SAMPLES];
-
 	int frequency = (random(7) + 1)*110;
 
-	double increment = frequency/44100.0;
-	double x = 0;
+	Int16 raw[SOUND_SAMPLES];
+	sinWave(raw, frequency);
 
-	//sawtooth wave
-	for(uint i = 0; i < SAMPLES; i++){
-		if(x >= 1)
-			x = -1;
-		
-		raw[i] = int(AMPLITUDE * x);
+	buffer.loadFromSamples(raw, SOUND_SAMPLES, 1, SOUND_SAMPLE_RATE);
 
-		x += increment*2;
-	}
-		
-	buffer.loadFromSamples(raw, SAMPLES, 1, SAMPLE_RATE);
+	//randomly set color, higher freq = brighter color, will mostly be blue
+	int brightness = int((frequency/880.0f)*255);
 
-	//set up the physical properties of the instrument
-	sprite.setFillColor(Color(100, 100, 100, 100));
-	sprite.setSize(Vector2f(SHAPE_RADIUS*2, SHAPE_RADIUS*2));
-	sprite.setOrigin(SHAPE_RADIUS, SHAPE_RADIUS);
-	sprite.setRotation(45);
+	color.r = brightness + 1 - random(brightness);
+	color.g = (brightness - color.r) + 1 - random(brightness - color.r);
+	color.b = brightness - color.g;
 
-	int freqfac = int((frequency/880.0f)*255);
+	//set other nessecary values
+	radius = 80 - (frequency/11);
 
-	color.r = freqfac + 1 - random(freqfac);
-	color.g = (freqfac - color.r) + 1 - random(freqfac - color.r);
-	color.b = freqfac - color.g;
+	x = y = 0;
+	rot = 0;
+
+	ox = length = 0;
+	time = 0;
 
 	enabled = false;
-
-	ox = 0;
 }
 
 void Pendulum::enable(){
-	sprite.setFillColor(color);
-
-	ox = sprite.getPosition().x;
-	length = sprite.getPosition().y;
+	ox = x;
+	length = y;
 	time = PI/2;
 
 	enabled = true;
 }
 
-float Pendulum::getX(){
-	return sprite.getPosition().x;
-}
-float Pendulum::getY(){
-	return sprite.getPosition().y;
-}
-float Pendulum::getRadius(){
-	return sprite.getSize().x/2;
+bool Pendulum::collidedWith(int px, int py){
+	return sqrt(pow(x - px + radius, 2) + pow(y - py + radius, 2)) < radius;
 }
 
 void Pendulum::physics(RenderWindow &window){
 	if(!enabled){
-		sprite.setPosition(Vector2f(Mouse::getPosition(window)));
-
+		x = Mouse::getPosition(window).x;
+		y = Mouse::getPosition(window).y;
 		return;
 	}
 	
@@ -78,11 +56,10 @@ void Pendulum::physics(RenderWindow &window){
 
 	float o = cos(time) + PI/2;
 
-	float x = ox + length*cos(o);
-	float y = length*sin(o);
+	x = ox + length*cos(o);
+	y = length*sin(o);
 
-	sprite.setRotation(45 + o*180/PI);
-	sprite.setPosition(x, y);
+	rot = o*180/PI;
 }
 
 void Pendulum::play(){
@@ -91,10 +68,6 @@ void Pendulum::play(){
 	sound.play();
 }
 void Pendulum::draw(RenderWindow &window){
-	Vertex line[] = {
-		Vector2f(ox, 0),
-		sprite.getPosition()
-	};
-	window.draw(&line[0], 2, Lines);
-	window.draw(sprite);
+	drawLine(window, color, ox, 0, x, y);
+	drawCircle(window, color, radius, x, y, rot);
 }
