@@ -11,7 +11,7 @@ private:
 	SoundBuffer buffer;
 	Sound sound;
 
-	ShapeType type;
+	ShapeType shape;
 
 	Color color;
 	float radius;
@@ -23,9 +23,7 @@ private:
 	float time;
 
 public:
-	bool enabled;
-
-	Pendulum();
+	Pendulum(float px, float py, ShapeType stype);
 
 	void enable();
 

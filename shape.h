@@ -15,18 +15,12 @@ enum ShapeType{
 	SQUARE
 };
 
-void sinWave(Int16 raw[], int frequency);
+void makeWave(ShapeType shape, Int16 raw[], int frequency);
 
-void triWave(Int16 raw[], int frequency);
-
-void sawWave(Int16 raw[], int frequency);
+void drawShape(ShapeType shape, RenderWindow &window, Color &color, float radius, float x, float y, float rot);
 
 void drawLine(RenderWindow &window, Color &color, float x1, float y1, float x2, float y2);
 
-void drawCircle(RenderWindow &window, Color &color, float radius, float x, float y, float rot);
-
-void drawTriangle(RenderWindow &window, Color &color, float radius, float x, float y, float rot);
-
-void drawSquare(RenderWindow &window, Color &color, float radius, float x, float y, float rot);
+void drawX(RenderWindow &window, Color &color, float radius, float x, float y, float rot);
 
 #endif

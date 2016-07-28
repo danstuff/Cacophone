@@ -1,39 +1,35 @@
 #include "pendulum.h"
 
-Pendulum::Pendulum(){
+Pendulum::Pendulum(float px, float py, ShapeType pshape){
+	//initialize basic nessecary values
+	shape = pshape;
+
+	x = px;
+	y = py;
+	rot = 0;
+
+	ox = x;
+	length = y;
+	time = float(PI)/2;
+
 	//set up the sound buffer
 	int frequency = (random(7) + 1)*110;
 
 	Int16 raw[SOUND_SAMPLES];
-	sinWave(raw, frequency);
+
+	makeWave(shape, raw, frequency);
 
 	buffer.loadFromSamples(raw, SOUND_SAMPLES, 1, SOUND_SAMPLE_RATE);
 
-	//randomly set color, higher freq = brighter color, will mostly be blue
+	//randomly set color, higher freq = brighter color, will mostly be blueish
 	int brightness = int((frequency/880.0f)*255);
 
-	color.r = brightness + 1 - random(brightness);
-	color.g = (brightness - color.r) + 1 - random(brightness - color.r);
+	color.r = brightness - random(brightness);
+	color.g = (brightness - color.r) - random(brightness - color.r);
 	color.b = brightness - color.g;
 
-	//set other nessecary values
-	radius = 80 - (frequency/11);
-
-	x = y = 0;
-	rot = 0;
-
-	ox = length = 0;
-	time = 0;
-
-	enabled = false;
-}
-
-void Pendulum::enable(){
-	ox = x;
-	length = y;
-	time = PI/2;
-
-	enabled = true;
+	//set radius based on frequency
+	radius = 80 - (frequency/11.0f);
 }
 
 bool Pendulum::collidedWith(int px, int py){
@@ -41,25 +37,22 @@ bool Pendulum::collidedWith(int px, int py){
 }
 
 void Pendulum::physics(RenderWindow &window){
-	if(!enabled){
-		x = Mouse::getPosition(window).x;
-		y = Mouse::getPosition(window).y;
-		return;
-	}
-	
-	time += 0.001f;
+	time += 0.00001f;
 
 	if(time >= 2*PI){
 		play();
 		time = 0;
 	}
+	else if(time >= PI - 0.0001 && time <= PI + 0.0001){
+		play();
+	}
 
-	float o = cos(time) + PI/2;
+	float o = cos(time) + float(PI)/2;
 
 	x = ox + length*cos(o);
 	y = length*sin(o);
 
-	rot = o*180/PI;
+	rot = o*180/float(PI);
 }
 
 void Pendulum::play(){
@@ -69,5 +62,6 @@ void Pendulum::play(){
 }
 void Pendulum::draw(RenderWindow &window){
 	drawLine(window, color, ox, 0, x, y);
-	drawCircle(window, color, radius, x, y, rot);
+
+	drawShape(shape, window, color, radius, x, y, rot);
 }

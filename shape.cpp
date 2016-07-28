@@ -1,18 +1,18 @@
 #include "shape.h"
 
 void sinWave(Int16 raw[], int frequency){
-	double increment = frequency/44100.0;
+	double increment = double(frequency)/44100.0;
 	double x = 0;
 
 	//sine wave
 	for(uint i = 0; i < SOUND_SAMPLES; i++){
-		raw[i] = SOUND_AMPLITUDE * sin(2*PI*x);
+		raw[i] = Int16(SOUND_AMPLITUDE * sin(2*PI*x));
 		x += increment;
 	}
 }
 
 void triWave(Int16 raw[], int frequency){
-	double increment = frequency/44100.0;
+	double increment = double(frequency)/44100.0;
 	double x = 0;
 
 	bool up_phase = false;
@@ -28,7 +28,7 @@ void triWave(Int16 raw[], int frequency){
 			x = -1;
 		}
 
-		raw[i] = SOUND_AMPLITUDE * x;
+		raw[i] = Int16(SOUND_AMPLITUDE * x);
 
 		if(up_phase)
 			x += increment*4;
@@ -38,7 +38,7 @@ void triWave(Int16 raw[], int frequency){
 }
 
 void sawWave(Int16 raw[], int frequency){
-	double increment = frequency/44100.0;
+	double increment = double(frequency)/44100.0;
 	double x = 0;
 
 	//sawtooth wave
@@ -46,18 +46,24 @@ void sawWave(Int16 raw[], int frequency){
 		if(x >= 1)
 			x = -1;
 		
-		raw[i] = int(SOUND_AMPLITUDE * x);
+		raw[i] = Int16(SOUND_AMPLITUDE * x);
 
 		x += increment*2;
 	}
 }
 
-void drawLine(RenderWindow &window, Color &color, float x1, float y1, float x2, float y2){
-	Vertex line[] = {
-		Vertex(Vector2f(x1, y1), color),
-		Vertex(Vector2f(x2, y2), color)
-	};
-	window.draw(&line[0], 2, Lines);
+void makeWave(ShapeType shape, Int16 raw[], int frequency){
+	switch(shape){
+	case CIRCLE:
+		sinWave(raw, frequency);
+		break;
+	case TRIANGLE:
+		triWave(raw, frequency);
+		break;
+	case SQUARE:
+		sawWave(raw, frequency);
+		break;
+	}
 }
 
 void drawCircle(RenderWindow &window, Color &color, float radius, float x, float y, float rot){
@@ -81,20 +87,61 @@ void drawTriangle(RenderWindow &window, Color &color, float radius, float x, flo
 
 	triangle.setPosition(x, y);
 	triangle.setOrigin(radius, radius);
-	triangle.setRotation(rot);
+	triangle.setRotation(rot-90);
 
 	window.draw(triangle);
 }
 
 void drawSquare(RenderWindow &window, Color &color, float radius, float x, float y, float rot){
-	static RectangleShape square(Vector2f(1, 1));
+	static RectangleShape square(Vector2f(1,1));
 
 	square.setFillColor(color);
-	square.setSize(Vector2f(radius*2, radius*2));
 
 	square.setPosition(x, y);
+	square.setSize(Vector2f(radius*2, radius*2));
 	square.setOrigin(radius, radius);
 	square.setRotation(45 + rot);
 
 	window.draw(square);
+}
+
+void drawShape(ShapeType shape, RenderWindow &window, Color &color, float radius, float x, float y, float rot){
+	switch(shape){
+	case CIRCLE:
+		drawCircle(window, color, radius, x, y, rot);
+		break;
+	case TRIANGLE:
+		drawTriangle(window, color, radius, x, y, rot);
+		break;
+	case SQUARE:
+		drawSquare(window, color, radius, x, y, rot);
+		break;
+	}
+}
+
+
+void drawLine(RenderWindow &window, Color &color, float x1, float y1, float x2, float y2){
+	Vertex line[] = {
+		Vertex(Vector2f(x1, y1), color),
+		Vertex(Vector2f(x2, y2), color)
+	};
+	window.draw(&line[0], 2, Lines);
+}
+
+void drawX(RenderWindow &window, Color &color, float radius, float x, float y, float rot){
+	static RectangleShape r1(Vector2f(radius*2, radius/2));
+	static RectangleShape r2(Vector2f(radius*2, radius/2));
+
+	r1.setFillColor(color);
+	r2.setFillColor(color);
+
+	r1.setPosition(x, y);
+	r2.setPosition(x, y);
+	r1.setOrigin(radius, radius/4);
+	r2.setOrigin(radius, radius/4);
+	r1.setRotation(rot - 45);
+	r2.setRotation(rot + 45);
+
+	window.draw(r1);
+	window.draw(r2);
 }
