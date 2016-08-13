@@ -1,16 +1,28 @@
 #include "pendulum.h"
 
-Pendulum::Pendulum(float px, float py, ShapeType pshape){
+const float INC = 0.1f/MS_PER_UPDATE;
+
+int random(int max){
+	if(max <= 0) return 0;
+
+	return rand() % max;
+}
+
+vector<Pendulum> pendulums;
+
+void createPendulum(float x, float y, ShapeType shape){
+	Pendulum p;
+
 	//initialize basic nessecary values
-	shape = pshape;
+	p.shape = shape;
 
-	x = px;
-	y = py;
-	rot = 0;
+	p.x = x;
+	p.y = y;
+	p.rot = 0;
 
-	ox = x;
-	length = y;
-	time = float(PI)/2;
+	p.ox = x;
+	p.oy = y;
+	p.time = float(PI)/2;
 
 	//set up the sound buffer
 	int frequency = (random(7) + 1)*110;
@@ -19,49 +31,83 @@ Pendulum::Pendulum(float px, float py, ShapeType pshape){
 
 	makeWave(shape, raw, frequency);
 
-	buffer.loadFromSamples(raw, SOUND_SAMPLES, 1, SOUND_SAMPLE_RATE);
+	p.buffer.loadFromSamples(raw, SOUND_SAMPLES, 1, SOUND_SAMPLE_RATE);
 
 	//randomly set color, higher freq = brighter color, will mostly be blueish
 	int brightness = int((frequency/880.0f)*255);
 
-	color.r = brightness - random(brightness);
-	color.g = (brightness - color.r) - random(brightness - color.r);
-	color.b = brightness - color.g;
+	p.color.r = brightness - random(brightness);
+	p.color.g = (brightness - p.color.r) - random(brightness - p.color.r);
+	p.color.b = brightness - p.color.g;
 
 	//set radius based on frequency
-	radius = 80 - (frequency/11.0f);
+	p.radius = 80 - (frequency/11.0f);
+
+	p.erase = false;
+
+	pendulums.push_back(p);
 }
 
-bool Pendulum::collidedWith(int px, int py){
-	return sqrt(pow(x - px + radius, 2) + pow(y - py + radius, 2)) < radius;
-}
+void tickPendulums(RenderWindow &window){
+	int mx = Mouse::getPosition(window).x;
+	int my = Mouse::getPosition(window).y;
 
-void Pendulum::physics(RenderWindow &window){
-	time += 0.00001f;
+	bool mouse_erase = Mouse::isButtonPressed(Mouse::Right);
 
-	if(time >= 2*PI){
-		play();
-		time = 0;
+	for(uint i = 0; i < pendulums.size(); i++){
+		Pendulum &p = pendulums[i];
+
+		//if the pendulum collided with the right-clicked mouse, flag for deletion
+		if(mouse_erase && sqrt((p.x-mx)*(p.x-mx) + (p.y-my)*(p.y-my)) < p.radius){
+			p.erase = true;
+		}
+
+		//do all physics calculations for the pendulum
+		if(p.erase == false){
+			p.time += INC;
+
+			if(p.time >= 2*PI){
+				p.sound.setBuffer(p.buffer);
+				p.sound.play();
+
+				p.time = 0;
+			}
+			else if(p.time >= PI - INC/2 && p.time <= PI + INC/2){
+				p.sound.setBuffer(p.buffer);
+				p.sound.play();
+			}
+
+			float o = cos(p.time) + float(PI)/2;
+
+			p.x = p.ox + p.oy*cos(o);
+			p.y = p.oy*sin(o);
+
+			p.rot = o*180/float(PI);
+		}
 	}
-	else if(time >= PI - 0.0001 && time <= PI + 0.0001){
-		play();
+}
+void drawPendulums(RenderWindow &window){
+	for(uint i = 0; i < pendulums.size(); i++){
+		Pendulum &p = pendulums[i];
+		
+		if(!p.erase){
+			drawLine(window, p.color, p.ox, 0, p.x, p.y);
+			drawShape(p.shape, window, p.color, p.radius, p.x, p.y, p.rot);
+		}
 	}
-
-	float o = cos(time) + float(PI)/2;
-
-	x = ox + length*cos(o);
-	y = length*sin(o);
-
-	rot = o*180/float(PI);
 }
 
-void Pendulum::play(){
-	sound.stop();
-	sound.setBuffer(buffer);
-	sound.play();
-}
-void Pendulum::draw(RenderWindow &window){
-	drawLine(window, color, ox, 0, x, y);
 
-	drawShape(shape, window, color, radius, x, y, rot);
+void cleanupPendulums(){
+	//for performance, must be called multiple times to erase all flagged
+	for(uint i = 0; i < pendulums.size(); i++){
+		if(pendulums[i].erase){
+			pendulums.erase(pendulums.begin() + i);
+			return;
+		}
+	}
+}
+
+void clearPendulums(){
+	pendulums.clear();
 }

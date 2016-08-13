@@ -6,34 +6,31 @@
 #include "main.h"
 #include "shape.h"
 
-class Pendulum{
-private:
+struct Pendulum{
 	SoundBuffer buffer;
 	Sound sound;
 
 	ShapeType shape;
-
+	
 	Color color;
 	float radius;
 
 	float x, y;
 	float rot;
 
-	float ox, length;
+	float ox, oy;
 	float time;
 
-public:
-	Pendulum(float px, float py, ShapeType stype);
-
-	void enable();
-
-	void play();
-
-	bool collidedWith(int px, int py);
-	
-	void physics(RenderWindow &window);
-
-	void draw(RenderWindow &window);
+	bool erase;
 };
+
+void createPendulum(float x, float y, ShapeType shape);
+
+void tickPendulums(RenderWindow &window);
+void drawPendulums(RenderWindow &window);
+
+void cleanupPendulums();
+
+void clearPendulums();
 
 #endif

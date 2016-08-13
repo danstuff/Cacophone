@@ -12,6 +12,7 @@ const uint SOUND_AMPLITUDE		= 1000;					//volume
 enum ShapeType{
 	CIRCLE,
 	TRIANGLE,
+	DIAMOND,
 	SQUARE
 };
 

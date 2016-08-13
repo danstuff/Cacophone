@@ -1,20 +1,13 @@
 #include "main.h"
 #include "pendulum.h"
-
-vector<Pendulum> pendulums;
+#include "block.h"
 
 ShapeType toolShape = CIRCLE;
 Color toolColor(100, 100, 100, 100);
 
-int random(int max){
-	if(max <= 0) return 0;
-
-	return rand() % max;
-}
-
 void handleEvents(RenderWindow &window){
-	int mx = Mouse::getPosition(window).x;
-	int my = Mouse::getPosition(window).y;
+	float mx = float(Mouse::getPosition(window).x);
+	float my = float(Mouse::getPosition(window).y);
 
 	Event event;
 	while (window.pollEvent(event)){
@@ -25,10 +18,17 @@ void handleEvents(RenderWindow &window){
 			window.close();
 			break;
 
+		case Event::KeyPressed:
+			if(event.key.code == Keyboard::Escape)
+				window.close();
+			break;
+
 		case Event::MouseButtonPressed:
 			if(event.mouseButton.button == Mouse::Left){
-				Pendulum pend(mx, my, toolShape);
-				pendulums.push_back(pend);
+				if(toolShape == SQUARE)
+					createBlock(mx, my);
+				else
+					createPendulum(mx, my, toolShape);
 			}
 			break;
 
@@ -43,29 +43,18 @@ void handleEvents(RenderWindow &window){
 	}
 }
 
-void pendulumPhysics(RenderWindow &window){
-	int mx = Mouse::getPosition(window).x;
-	int my = Mouse::getPosition(window).y;
-
-	for(uint i = 0; i < pendulums.size(); i++){		
-		pendulums[i].physics(window);
-
-		//if the ball is too close to right-clicked mouse, delete it
-		if(Mouse::isButtonPressed(Mouse::Right) &&
-			pendulums[i].collidedWith(mx, my)){
-				pendulums.erase(pendulums.begin() + i);
-		}
-	}
-}
-
 int main(){
 	//set random seed
 	SYSTEMTIME gtime;
 	GetSystemTime(&gtime);
 	srand((uint)gtime.wMilliseconds);
 
+	//turn on anti-aliasing
+	ContextSettings settings;
+	settings.antialiasingLevel = 4;
+
 	//set up the window
-    RenderWindow window(VideoMode(640, 480), "Cacophone");
+	RenderWindow window(VideoMode(640, 480), "Cacophone", Style::Default, settings);
 	window.setKeyRepeatEnabled(false);
 
 	//timer for lag compensation
@@ -74,35 +63,45 @@ int main(){
 	double lag = 0.0;
 
     while (window.isOpen()){
-		double elapsed = runTime.restart().asMicroseconds();
+		double elapsed = runTime.restart().asMicroseconds()/1000.0;
 		lag += elapsed;
-
-		handleEvents(window);
-
+		
+		cout << "Frame Rate: " << (1/elapsed)*1000 << endl;
+		
 		while(lag >= MS_PER_UPDATE){
-			pendulumPhysics(window);
+			handleEvents(window);
+
+			//ticking
+			tickPendulums(window);
+			tickBlocks(window);
+
+			cleanupPendulums();
+			cleanupBlocks();
+
 			lag -= MS_PER_UPDATE;
 		}		
 
 		//drawing
-        window.clear();
+        window.clear(Color(100, 200, 200));
 
 		//draw tool at mouse cursor
-		int mx = Mouse::getPosition(window).x;
-		int my = Mouse::getPosition(window).y;
+		float mx = float(Mouse::getPosition(window).x);
+		float my = float(Mouse::getPosition(window).y);
 
 		if(Mouse::isButtonPressed(Mouse::Right))
 			drawX(window, toolColor, 20, mx, my, 0);
 		else
 			drawShape(toolShape, window, toolColor, 20, mx, my, 0);
 		
-		//loop and draw all pendulums
-		for(uint i = 0; i < pendulums.size(); i++){		
-			pendulums[i].draw(window);
-		}
+		//draw objects
+		drawPendulums(window);
+		drawBlocks(window);
 
         window.display();
     }
+
+	clearPendulums();
+	clearBlocks();
 
     return 0;
 }

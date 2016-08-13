@@ -22,13 +22,11 @@ using namespace sf;
 
 typedef unsigned int uint;
 
-const uint WIDTH = 640;
-const uint HEIGHT = 480;
-
 const double PI = 3.14159265359;
 
 const int MS_PER_UPDATE = 8;
 
-int random(int max);
+const uint WIDTH = 640;
+const uint HEIGHT = 480;
 
 #endif

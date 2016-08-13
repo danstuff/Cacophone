@@ -60,11 +60,12 @@ void makeWave(ShapeType shape, Int16 raw[], int frequency){
 	case TRIANGLE:
 		triWave(raw, frequency);
 		break;
-	case SQUARE:
+	case DIAMOND:
 		sawWave(raw, frequency);
 		break;
 	}
 }
+
 
 void drawCircle(RenderWindow &window, Color &color, float radius, float x, float y, float rot){
 	static CircleShape circle(1, 30);
@@ -100,7 +101,7 @@ void drawSquare(RenderWindow &window, Color &color, float radius, float x, float
 	square.setPosition(x, y);
 	square.setSize(Vector2f(radius*2, radius*2));
 	square.setOrigin(radius, radius);
-	square.setRotation(45 + rot);
+	square.setRotation(rot);
 
 	window.draw(square);
 }
@@ -112,6 +113,9 @@ void drawShape(ShapeType shape, RenderWindow &window, Color &color, float radius
 		break;
 	case TRIANGLE:
 		drawTriangle(window, color, radius, x, y, rot);
+		break;
+	case DIAMOND:
+		drawSquare(window, color, radius, x, y, 45+rot);
 		break;
 	case SQUARE:
 		drawSquare(window, color, radius, x, y, rot);
