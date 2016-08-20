@@ -7,7 +7,7 @@
 
 const uint SOUND_SAMPLE_RATE	= 44100;				//samples per second
 const uint SOUND_SAMPLES		= SOUND_SAMPLE_RATE/4;	//total samples
-const uint SOUND_AMPLITUDE		= 1000;					//volume
+const uint SOUND_AMPLITUDE		= 1000;
 
 enum ShapeType{
 	CIRCLE,
@@ -16,7 +16,22 @@ enum ShapeType{
 	SQUARE
 };
 
-void makeWave(ShapeType shape, Int16 raw[], int frequency);
+struct ShapeSound{
+	SoundBuffer buffer;
+	Sound sound;
+
+	ShapeType shape;
+};
+
+void setVolume(uint nv);
+
+void makeWave(ShapeSound &ss, int frequency);
+
+void playWave(ShapeSound &ss);
+
+void startNoise();
+
+void stopNoise();
 
 void drawShape(ShapeType shape, RenderWindow &window, Color &color, float radius, float x, float y, float rot);
 

@@ -3,6 +3,9 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <SFML\Graphics.hpp>
+#include <SFML\Audio.hpp>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -14,9 +17,6 @@
 #include <random>
 #include <Windows.h>
 
-#include <SFML\Graphics.hpp>
-#include <SFML\Audio.hpp>
-
 using namespace std;
 using namespace sf;
 
@@ -24,9 +24,13 @@ typedef unsigned int uint;
 
 const double PI = 3.14159265359;
 
-const int MS_PER_UPDATE = 8;
+const double MS_PER_FRAME = 1000/120.0f;
 
-const uint WIDTH = 640;
-const uint HEIGHT = 480;
+const int MS_PER_UPDATE = 8;
+const float INC = 0.1f/MS_PER_UPDATE;
+
+const string FONT_FILE = "comfortaa.ttf";
+
+int random(int max);
 
 #endif

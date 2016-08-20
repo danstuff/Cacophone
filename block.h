@@ -7,6 +7,9 @@
 
 struct Block{
 	float x, y;
+
+	float pulse;
+
 	bool erase;
 };
 

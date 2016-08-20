@@ -7,19 +7,18 @@
 #include "shape.h"
 
 struct Pendulum{
-	SoundBuffer buffer;
-	Sound sound;
+	ShapeSound ss;
 
-	ShapeType shape;
-	
 	Color color;
+
+	float x, y, ox, oy;
+
 	float radius;
+	float rotation;
 
-	float x, y;
-	float rot;
-
-	float ox, oy;
 	float time;
+
+	float pulse;
 
 	bool erase;
 };
@@ -32,5 +31,7 @@ void drawPendulums(RenderWindow &window);
 void cleanupPendulums();
 
 void clearPendulums();
+
+vector<Pendulum> &getPendulums();
 
 #endif
